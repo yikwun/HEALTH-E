@@ -40,6 +40,8 @@ public class HomeScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
+//        Model model = new Model();
+
         mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -49,6 +51,14 @@ public class HomeScreen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity (new Intent(HomeScreen.this, Settings.class));
+            }
+        });
+
+        Button call = (Button) findViewById(R.id.call);
+        call.setOnClickListener (new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Emergency call function
             }
         });
     }
