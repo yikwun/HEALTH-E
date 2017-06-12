@@ -16,9 +16,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!--<activity-->
+            <!--android:name=".SettingsActivity"-->
+            <!--android:label="@string/title_activity_home_screen" />-->
         <activity
-            android:name=".Settings"
-            android:label="@string/title_activity_home_screen"></activity>
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".HomeScreen">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.health_e.HomeScreen" />
+        </activity>
     </application>
 
 </manifest>
