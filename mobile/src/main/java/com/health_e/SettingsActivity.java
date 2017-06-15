@@ -188,12 +188,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+            // Bind the summaries of Name/Age/Contact Name and Number preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-//            bindPreferenceSummaryToValue(findPreference("example_text"));
-//            bindPreferenceSummaryToValue(findPreference("example_list"));
+            bindPreferenceSummaryToValue(findPreference ("name"));
+            bindPreferenceSummaryToValue(findPreference ("age"));
+            bindPreferenceSummaryToValue(findPreference ("contact_name"));
+            bindPreferenceSummaryToValue(findPreference ("contact_number"));
         }
 
         @Override
@@ -264,17 +266,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 return true;
             }
 
-            final Intent intent = new Intent (Intent.ACTION_MAIN, null);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-            ComponentName cn = new ComponentName ("com.android.settings",
-                    "com.android.settings.bluetooth.BluetoothSettings");
-            intent.setComponent (cn);
-            intent.setFlags (Intent.FLAG_ACTIVITY_NEW_TASK);
-//            startActivity (intent);
-            item.setIntent (intent);
-            startActivity(item.getIntent());
-            return true;
-//            return super.onOptionsItemSelected(item);
+            /* remember to check bluetooth on phone to make sure it works
+               (bluetooth doesn't work on emulator) */
+            startActivity (new Intent (android.provider.Settings.ACTION_BLUETOOTH_SETTINGS));
+            return super.onOptionsItemSelected(item);
         }
     }
 }
