@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -25,8 +26,18 @@ import android.widget.Toast;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
-public class HomeScreen extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST_CALLPHONE = 0;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Wearable;
+
+import java.nio.ByteBuffer;
+
+public class HomeScreen extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks{
+    private static final int MY_PERMISSIONS_REQUEST_CALLPHONE = 1;
+    String message="";
+    double testData;
+    GoogleApiClient googleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +45,12 @@ public class HomeScreen extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
 
 //        Model model = new Model();
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .build();
+
+
 
         Button settings = (Button) findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
@@ -88,27 +105,88 @@ public class HomeScreen extends AppCompatActivity {
     }
 
     protected void makeEmergencyCall() {
-        Intent callIntent = new Intent(Intent.ACTION_CALL);
-        callIntent.setData(Uri.parse("tel:2267917318"));
         PhoneCallListener phoneListener = new PhoneCallListener();
         TelephonyManager telephonyManager = (TelephonyManager) this
                 .getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
-
+        Intent callIntent = new Intent(Intent.ACTION_CALL);
+        callIntent.setData(Uri.parse("tel:2267917318"));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALLPHONE);
+        } else {
+            startActivity(callIntent);
         }
-        startActivity(callIntent);
     }
 
-        private class PhoneCallListener extends PhoneStateListener {
+    public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CALLPHONE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent callIntent = new Intent(Intent.ACTION_CALL);
+                    callIntent.setData(Uri.parse("tel:2267917318"));
+                    startActivity(callIntent);
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "SMS faild, please try again.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+        }
+
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        googleApiClient.connect();
+    }
+
+    @Override
+    public void onStop(){
+
+        if (null != googleApiClient && googleApiClient.isConnected()){
+            Wearable.MessageApi.removeListener(googleApiClient, this);
+            googleApiClient.disconnect();
+        }
+
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Wearable.MessageApi.addListener(googleApiClient,this);
+        Toast.makeText(getApplicationContext(),"Connected to Google API Client",Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+        Toast.makeText(getApplicationContext(),"Suspended",Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+        message = messageEvent.getPath();
+        testData = toDouble(messageEvent.getData());
+        if (message != null && !Double.isNaN(testData)) {
+            Toast.makeText(getApplicationContext(), "Message is: " + message, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),"Data is: " + String.valueOf(testData),Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static double toDouble(byte[] bytes) {
+        return ByteBuffer.wrap(bytes).getDouble();
+    }
+
+    public void showText()
+    {
+        Toast.makeText(getApplicationContext(),"Message is: " + message,Toast.LENGTH_LONG).show();
+    }
+
+
+    private class PhoneCallListener extends PhoneStateListener {
             private boolean isPhoneCalling = false;
             String LOG_TAG = "LOGGING 123";
             @Override
