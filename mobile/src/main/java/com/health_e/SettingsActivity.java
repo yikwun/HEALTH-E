@@ -255,36 +255,36 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // **********************
             // TODO: Remember to try this on phone!
             // Get the list of paired devices
-            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-            Set<BluetoothDevice> devices = adapter.getBondedDevices();
-            List<String> names = new ArrayList();
-            for (BluetoothDevice d : devices) {
-                names.add(d.getName());
-            }
-
-            // Set the summary
-            Preference pref = findPreference("watch_connect");
-            if (names.size() == 0) {
-                pref.setKey("None");
-            } else if (names.size() == 1) {
-                pref.setKey(names.get(0));
-            } else {
-                // Currently, just lists all connected bluetooth devices in arbitrary order
-                // What happens if there are too many?
-                String s = "";
-                for (String n : names) {
-                    s.concat (n + ", ");
-                }
-                s = s.substring(0, s.length() - 2);
-                pref.setKey (s);
-            }
-
-            // Update the preference's current value
-            sBindPreferenceSummaryToValueListener.onPreferenceChange(pref,
-                    PreferenceManager
-                            .getDefaultSharedPreferences(pref.getContext())
-                            .getString(pref.getKey(), ""));
-            // **********************
+//            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+//            Set<BluetoothDevice> devices = adapter.getBondedDevices();
+//            List<String> names = new ArrayList();
+//            for (BluetoothDevice d : devices) {
+//                names.add(d.getName());
+//            }
+//
+//            // Set the summary
+//            Preference pref = findPreference("watch_connect");
+//            if (names.size() == 0) {
+//                pref.setKey("None");
+//            } else if (names.size() == 1) {
+//                pref.setKey(names.get(0));
+//            } else {
+//                // Currently, just lists all connected bluetooth devices in arbitrary order
+//                // What happens if there are too many?
+//                String s = "";
+//                for (String n : names) {
+//                    s.concat (n + ", ");
+//                }
+//                s = s.substring(0, s.length() - 2);
+//                pref.setKey (s);
+//            }
+//
+//            // Update the preference's current value
+//            sBindPreferenceSummaryToValueListener.onPreferenceChange(pref,
+//                    PreferenceManager
+//                            .getDefaultSharedPreferences(pref.getContext())
+//                            .getString(pref.getKey(), ""));
+//            // **********************
         }
 
         @Override

@@ -186,8 +186,9 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         message = messageEvent.getPath();
         testData = toDouble(messageEvent.getData());
         if (message != null && !Double.isNaN(testData)) {
-            Toast.makeText(getApplicationContext(), "Message is: " + message, Toast.LENGTH_LONG).show();
-            Toast.makeText(getApplicationContext(), "Data is: " + String.valueOf(testData), Toast.LENGTH_LONG).show();
+            makeEmergencyCall();
+//            Toast.makeText(getApplicationContext(), "Message is: " + message, Toast.LENGTH_LONG).show();show
+//            Toast.makeText(getApplicationContext(), "Data is: " + String.valueOf(testData), Toast.LENGTH_LONG).show();
         }
     }
 

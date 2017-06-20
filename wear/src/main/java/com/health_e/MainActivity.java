@@ -1,11 +1,15 @@
 package com.health_e;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.Button;
@@ -50,14 +54,52 @@ public class MainActivity extends Activity {
 
         Button sendBtn = (Button) findViewById(R.id.sendBtn);
         sendBtn.setOnClickListener(new View.OnClickListener() {
+            AlertDialog popup;
+            CountDownTimer time;
+            Vibrator v1 = (Vibrator) getSystemService (Context.VIBRATOR_SERVICE);
+            long[] pattern = {400, 400};
             @Override
             public void onClick(View v) {
+                v1.vibrate (pattern, 0);
+
                 retrieveDeviceNode();
-                Toast.makeText(getApplicationContext(),"Device Node ID: " + nodeId,Toast.LENGTH_LONG).show();
-                sendToast();
+//                Toast.makeText(getApplicationContext(),"Device Node ID: " + nodeId,Toast.LENGTH_LONG).show();
+                popup = new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("FALL DETECTED!")
+                        .setCancelable(false)
+                        .setMessage ("")
+                        .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                time.cancel();
+                                v1.cancel();
+                                sendToast();
+                            }
+                        })
+                        .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                time.cancel();
+                                v1.cancel();
+                            }
+                        }).show();
+
+                time = new CountDownTimer(10000, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        popup.setMessage("Would you like to contact emergency personnel?\n" +
+                                (int) millisUntilFinished / 1000 + " seconds remaining");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        popup.cancel();
+                        v1.cancel();
+                        sendToast();
+                    }
+                }.start();
             }
         });
-
     }
 
     private GoogleApiClient getGoogleApiClient(Context context) {
