@@ -3,6 +3,8 @@ package com.health_e;
 import java.util.Vector;
 
 public class Model {
+    String name, emer;
+    int age, emer_num;
     int hr, temp;
     Vector<Observer> observers;
 

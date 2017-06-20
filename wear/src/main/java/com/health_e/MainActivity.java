@@ -87,7 +87,7 @@ public class MainActivity extends Activity {
                 time = new CountDownTimer(10000, 1000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
-                        popup.setMessage("Would you like to contact emergency personnel?\n" +
+                        popup.setMessage("Do you need help?\n" +
                                 (int) millisUntilFinished / 1000 + " seconds remaining");
                     }
 

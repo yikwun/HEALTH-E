@@ -34,8 +34,8 @@ public class Input extends AppCompatActivity {
     }
 
     protected void sendSMSMessage() {
-        String phoneNo = "2267917318";
-        String message = "Testing";
+        String phoneNo = "4166708515";
+        String message = "contact_name has updated their information.";
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.SEND_SMS)
