@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
@@ -33,9 +34,9 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.nio.ByteBuffer;
 
-public class HomeScreen extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks{
+public class HomeScreen extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks {
     private static final int MY_PERMISSIONS_REQUEST_CALLPHONE = 1;
-    String message="";
+    String message = "";
     double testData;
     GoogleApiClient googleApiClient;
 
@@ -49,7 +50,6 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
                 .build();
-
 
 
         Button settings = (Button) findViewById(R.id.settings);
@@ -69,9 +69,6 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         });
 
 
-        //Emergency Call function:
-        //
-
         Button call = (Button) findViewById(R.id.call);
         call.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,25 +78,43 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         });
 
         Button temp = (Button) findViewById(R.id.temp);
-        temp.setOnClickListener(new View.OnClickListener(){
+        temp.setOnClickListener(new View.OnClickListener() {
+            AlertDialog popup;
+            CountDownTimer time;
+
             @Override
-            public void onClick (View v){
-                new AlertDialog.Builder(HomeScreen.this)
+            public void onClick(View v) {
+                popup = new AlertDialog.Builder(HomeScreen.this)
                         .setTitle("FALL DETECTED!")
-                        .setMessage("Would you like to contact emergency personnel?")
                         .setCancelable(false)
+                        .setMessage ("")
                         .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // Call emergency contact
+                                time.cancel();
+                                makeEmergencyCall();
                             }
                         })
                         .setNegativeButton("no", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
+                                time.cancel();
                             }
                         }).show();
+
+                time = new CountDownTimer(6000, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        popup.setMessage("Would you like to contact emergency personnel?\n" +
+                                (int) millisUntilFinished / 1000 + " seconds remaining");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        popup.cancel();
+                        makeEmergencyCall();
+                    }
+                }.start();
             }
         });
     }
@@ -110,7 +125,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                 .getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
         Intent callIntent = new Intent(Intent.ACTION_CALL);
-        callIntent.setData(Uri.parse("tel:2267917318"));
+        callIntent.setData(Uri.parse("tel:4166708515"));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALLPHONE);
         } else {
@@ -118,7 +133,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         }
     }
 
-    public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CALLPHONE: {
                 if (grantResults.length > 0
@@ -128,7 +143,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     startActivity(callIntent);
                 } else {
                     Toast.makeText(getApplicationContext(),
-                            "SMS faild, please try again.", Toast.LENGTH_LONG).show();
+                            "SMS failed, please try again.", Toast.LENGTH_LONG).show();
                     return;
                 }
             }
@@ -137,15 +152,15 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         googleApiClient.connect();
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
 
-        if (null != googleApiClient && googleApiClient.isConnected()){
+        if (null != googleApiClient && googleApiClient.isConnected()) {
             Wearable.MessageApi.removeListener(googleApiClient, this);
             googleApiClient.disconnect();
         }
@@ -155,15 +170,15 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Wearable.MessageApi.addListener(googleApiClient,this);
-        Toast.makeText(getApplicationContext(),"Connected to Google API Client",Toast.LENGTH_SHORT).show();
+        Wearable.MessageApi.addListener(googleApiClient, this);
+        Toast.makeText(getApplicationContext(), "Connected to Google API Client", Toast.LENGTH_SHORT).show();
 
     }
 
     @Override
     public void onConnectionSuspended(int i) {
 
-        Toast.makeText(getApplicationContext(),"Suspended",Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Suspended", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -172,7 +187,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         testData = toDouble(messageEvent.getData());
         if (message != null && !Double.isNaN(testData)) {
             Toast.makeText(getApplicationContext(), "Message is: " + message, Toast.LENGTH_LONG).show();
-            Toast.makeText(getApplicationContext(),"Data is: " + String.valueOf(testData),Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Data is: " + String.valueOf(testData), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -180,51 +195,50 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         return ByteBuffer.wrap(bytes).getDouble();
     }
 
-    public void showText()
-    {
-        Toast.makeText(getApplicationContext(),"Message is: " + message,Toast.LENGTH_LONG).show();
+    public void showText() {
+        Toast.makeText(getApplicationContext(), "Message is: " + message, Toast.LENGTH_LONG).show();
     }
 
 
     private class PhoneCallListener extends PhoneStateListener {
-            private boolean isPhoneCalling = false;
-            String LOG_TAG = "LOGGING 123";
-            @Override
-            public void onCallStateChanged(int state, String incomingNumber) {
+        private boolean isPhoneCalling = false;
+        String LOG_TAG = "LOGGING 123";
 
-                if (TelephonyManager.CALL_STATE_RINGING == state) {
-                    // phone ringing
-                    Log.i(LOG_TAG, "RINGING, number: " + incomingNumber);
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+
+            if (TelephonyManager.CALL_STATE_RINGING == state) {
+                // phone ringing
+                Log.i(LOG_TAG, "RINGING, number: " + incomingNumber);
+            }
+
+            if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
+                // active
+                Log.i(LOG_TAG, "OFFHOOK");
+
+                isPhoneCalling = true;
+            }
+
+            if (TelephonyManager.CALL_STATE_IDLE == state) {
+                // run when class initial and phone call ended,
+                // need detect flag from CALL_STATE_OFFHOOK
+                Log.i(LOG_TAG, "IDLE");
+
+                if (isPhoneCalling) {
+
+                    Log.i(LOG_TAG, "restart app");
+
+                    // restart app
+                    Intent i = getBaseContext().getPackageManager()
+                            .getLaunchIntentForPackage(
+                                    getBaseContext().getPackageName());
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(i);
+
+                    isPhoneCalling = false;
                 }
 
-                if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
-                    // active
-                    Log.i(LOG_TAG, "OFFHOOK");
-
-                    isPhoneCalling = true;
-                }
-
-                if (TelephonyManager.CALL_STATE_IDLE == state) {
-                    // run when class initial and phone call ended,
-                    // need detect flag from CALL_STATE_OFFHOOK
-                    Log.i(LOG_TAG, "IDLE");
-
-                    if (isPhoneCalling) {
-
-                        Log.i(LOG_TAG, "restart app");
-
-                        // restart app
-                        Intent i = getBaseContext().getPackageManager()
-                                .getLaunchIntentForPackage(
-                                        getBaseContext().getPackageName());
-                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(i);
-
-                        isPhoneCalling = false;
-                    }
-
-                }
             }
         }
-
     }
+}

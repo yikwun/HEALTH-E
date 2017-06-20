@@ -2,6 +2,8 @@ package com.health_e;
 
 
 import android.annotation.TargetApi;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -20,10 +22,13 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -192,10 +197,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference ("name"));
-            bindPreferenceSummaryToValue(findPreference ("age"));
-            bindPreferenceSummaryToValue(findPreference ("contact_name"));
-            bindPreferenceSummaryToValue(findPreference ("contact_number"));
+            bindPreferenceSummaryToValue(findPreference("name"));
+            bindPreferenceSummaryToValue(findPreference("age"));
+            bindPreferenceSummaryToValue(findPreference("contact_name"));
+            bindPreferenceSummaryToValue(findPreference("contact_number"));
         }
 
         @Override
@@ -221,10 +226,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_history);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
 //            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
         }
 
@@ -251,11 +252,39 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_sync);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-//            bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+            // **********************
+            // TODO: Remember to try this on phone!
+            // Get the list of paired devices
+            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+            Set<BluetoothDevice> devices = adapter.getBondedDevices();
+            List<String> names = new ArrayList();
+            for (BluetoothDevice d : devices) {
+                names.add(d.getName());
+            }
+
+            // Set the summary
+            Preference pref = findPreference("watch_connect");
+            if (names.size() == 0) {
+                pref.setKey("None");
+            } else if (names.size() == 1) {
+                pref.setKey(names.get(0));
+            } else {
+                // Currently, just lists all connected bluetooth devices in arbitrary order
+                // What happens if there are too many?
+                String s = "";
+                for (String n : names) {
+                    s.concat (n + ", ");
+                }
+                s = s.substring(0, s.length() - 2);
+                pref.setKey (s);
+            }
+
+            // Update the preference's current value
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(pref,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(pref.getContext())
+                            .getString(pref.getKey(), ""));
+            // **********************
         }
 
         @Override
@@ -266,9 +295,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 return true;
             }
 
-            /* remember to check bluetooth on phone to make sure it works
-               (bluetooth doesn't work on emulator) */
-            startActivity (new Intent (android.provider.Settings.ACTION_BLUETOOTH_SETTINGS));
             return super.onOptionsItemSelected(item);
         }
     }
