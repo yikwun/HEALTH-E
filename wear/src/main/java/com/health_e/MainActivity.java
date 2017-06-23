@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
@@ -27,18 +28,26 @@ import java.util.concurrent.TimeUnit;
 
 import static android.R.attr.gravity;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements SensorEventListener {
 
     private TextView mTextView;
     public SensorManager mSensorManager;
     public Sensor mSensor;
-    float gravity[];
-    float linear_acceleration[];
+    float gravity[]={0f,0f,0f};
+    float linear_acceleration[] = {0f,0f,0f};
+    double totAcc;
     String nodeId;
     final int CONNECTION_TIME_OUT_MS = 5000;
     String MESSAGE = "Hello from the other world!";
     double senseArray[] = {1.2,3.4,5.6,7.8,9.1};
 
+    TextView xvalue;
+    TextView yvalue;
+    TextView zvalue;
+
+    private SensorManager sensorManager;
+    private  Sensor sensorAcc;
+    private  Sensor sensorHeart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +60,16 @@ public class MainActivity extends Activity {
                 mTextView = (TextView) stub.findViewById(R.id.text);
             }
         });*/
+
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorAcc = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorHeart = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
+        sensorManager.registerListener(this, sensorAcc, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensorHeart, SensorManager.SENSOR_DELAY_NORMAL);
+
+        xvalue = (TextView) findViewById(R.id.ValX);
+        yvalue = (TextView) findViewById(R.id.ValY);
+        zvalue = (TextView) findViewById(R.id.ValZ);
 
         Button sendBtn = (Button) findViewById(R.id.sendBtn);
         sendBtn.setOnClickListener(new View.OnClickListener() {
@@ -100,6 +119,43 @@ public class MainActivity extends Activity {
                 }.start();
             }
         });
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event)
+    {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            final float alpha = (float) 0.8;
+            // Isolate the force of gravity with the low-pass filter.
+            gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
+            gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
+            gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+
+
+            // Remove the gravity contribution with the high-pass filter.
+            linear_acceleration[0] = event.values[0] - gravity[0];
+            linear_acceleration[1] = event.values[1] - gravity[1];
+            linear_acceleration[2] = event.values[2] - gravity[2];
+
+            totAcc = Math.sqrt( linear_acceleration[0]*linear_acceleration[0] +
+                                linear_acceleration[1]*linear_acceleration[1] +
+                                linear_acceleration[2]*linear_acceleration[2]);
+
+            xvalue.setText(String.valueOf(totAcc));
+//            yvalue.setText(String.valueOf(0));
+            zvalue.setText(String.valueOf(0));
+        }
+        if (event.sensor.getType() == Sensor.TYPE_HEART_RATE) {
+
+            yvalue.setText(String.valueOf(event.values[0]));
+
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy)
+    {
+
     }
 
     private GoogleApiClient getGoogleApiClient(Context context) {

@@ -11,7 +11,34 @@
         android:id="@+id/sendBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Fall Detected"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp" />
+
+    <TextView
+        android:id="@+id/ValX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="Fall Detected" />
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/ValY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="21dp"
+        android:text="TextView"
+        android:layout_below="@+id/ValX"
+        android:layout_alignStart="@+id/ValX" />
+
+    <TextView
+        android:id="@+id/ValZ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:layout_below="@+id/ValY"
+        android:layout_alignStart="@+id/ValY"
+        android:layout_marginTop="22dp" />
 </RelativeLayout>
