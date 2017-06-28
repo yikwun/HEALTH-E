@@ -1,33 +1,27 @@
 package com.health_e;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
@@ -36,6 +30,7 @@ import java.nio.ByteBuffer;
 
 public class HomeScreen extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks {
     private static final int MY_PERMISSIONS_REQUEST_CALLPHONE = 1;
+    private FusedLocationProviderClient location;
     String message = "";
     double testData;
     GoogleApiClient googleApiClient;
@@ -45,6 +40,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
+        location = LocationServices.getFusedLocationProviderClient(this);
 //        Model model = new Model();
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -79,43 +75,58 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
         Button temp = (Button) findViewById(R.id.temp);
         temp.setOnClickListener(new View.OnClickListener() {
-            AlertDialog popup;
-            CountDownTimer time;
-
             @Override
-            public void onClick(View v) {
-                popup = new AlertDialog.Builder(HomeScreen.this)
-                        .setTitle("FALL DETECTED!")
-                        .setCancelable(false)
-                        .setMessage ("")
-                        .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                time.cancel();
-                                makeEmergencyCall();
-                            }
-                        })
-                        .setNegativeButton("no", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                time.cancel();
-                            }
-                        }).show();
-
-                time = new CountDownTimer(6000, 1000) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        popup.setMessage("Would you like to contact emergency personnel?\n" +
-                                (int) millisUntilFinished / 1000 + " seconds remaining");
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        popup.cancel();
-                        makeEmergencyCall();
-                    }
-                }.start();
+            public void onClick (View v) {
+                if (PermissionChecker.checkSelfPermission(HomeScreen.this, "android.permission.ACCESS_FINE_LOCATION") == PermissionChecker.PERMISSION_GRANTED) {
+                    location.getLastLocation()
+                            .addOnSuccessListener(HomeScreen.this, new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location l) {
+                                    if (l != null) {
+                                        // Location found, send to model
+                                        // https://stackoverflow.com/questions/1513485/how-do-i-get-the-current-gps-location-programmatically-in-android
+                                    }
+                                }
+                            });
+                }
             }
+//            AlertDialog popup;
+//            CountDownTimer time;
+//
+//            @Override
+//            public void onClick(View v) {
+//                popup = new AlertDialog.Builder(HomeScreen.this)
+//                        .setTitle("FALL DETECTED!")
+//                        .setCancelable(false)
+//                        .setMessage ("")
+//                        .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                time.cancel();
+//                                makeEmergencyCall();
+//                            }
+//                        })
+//                        .setNegativeButton("no", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                time.cancel();
+//                            }
+//                        }).show();
+//
+//                time = new CountDownTimer(6000, 1000) {
+//                    @Override
+//                    public void onTick(long millisUntilFinished) {
+//                        popup.setMessage("Would you like to contact emergency personnel?\n" +
+//                                (int) millisUntilFinished / 1000 + " seconds remaining");
+//                    }
+//
+//                    @Override
+//                    public void onFinish() {
+//                        popup.cancel();
+//                        makeEmergencyCall();
+//                    }
+//                }.start();
+//            }
         });
     }
 
@@ -140,11 +151,13 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
                     callIntent.setData(Uri.parse("tel:2267917318"));
-                    startActivity(callIntent);
+                    if (PermissionChecker.checkSelfPermission(HomeScreen.this, "android.permission.CALL_PHONE") ==
+                            PermissionChecker.PERMISSION_GRANTED) {
+                        startActivity(callIntent);
+                    }
                 } else {
                     Toast.makeText(getApplicationContext(),
                             "SMS failed, please try again.", Toast.LENGTH_LONG).show();
-                    return;
                 }
             }
         }

@@ -11,8 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import static android.R.id.message;
-
 public class Input extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS =0 ;
 
@@ -69,7 +67,4 @@ public class Input extends AppCompatActivity {
         }
 
     }
-
-
-
 }
