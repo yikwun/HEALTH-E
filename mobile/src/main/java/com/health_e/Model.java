@@ -1,8 +1,9 @@
 package com.health_e;
 
+import java.util.Observable;
 import java.util.Vector;
 
-public class Model {
+public class Model extends Observable{
     String name, emer;
     int age, emer_num;
     int hr, temp;
@@ -19,7 +20,7 @@ public class Model {
         observers.add (o);
     }
 
-    public void removeObserver (Observer o) {
+    public void deleteObserver (Observer o) {
         observers.remove (o);
     }
 
