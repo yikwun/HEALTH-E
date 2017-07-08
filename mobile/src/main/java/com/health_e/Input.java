@@ -13,14 +13,14 @@ import android.widget.Toast;
 
 public class Input extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS =0 ;
-
+    Model appData;
     String phoneNo;
     String message ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input);
-
+        appData=Model.getInstance("s");
         Button submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,7 +45,7 @@ public class Input extends AppCompatActivity {
         else {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, message, null, null);
-            Toast.makeText(getApplicationContext(), "SMS sent.",
+            Toast.makeText(getApplicationContext(),appData.getUserName(),
                     Toast.LENGTH_LONG).show();
         }
     }

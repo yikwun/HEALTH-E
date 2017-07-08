@@ -13,13 +13,13 @@ public class Model {
     int hr, temp;
 //    Vector<Observer> observers;
 
-    private Model() {
-
+    private Model(String uname) {
+        userName=uname;
     }
 
-    public static synchronized Model getInstance(){
+    public static synchronized Model getInstance(String uname ){
         if (singletonModel==null){
-            singletonModel= new Model();
+            singletonModel= new Model(uname);
         }
         return singletonModel;
     }
@@ -29,7 +29,9 @@ public class Model {
     public int getHR() { return hr; }
     public void setTemp(int t) { temp = t; }
     public void setHR(int h) { hr = h; }
-
+    public String getUserName(){
+        return userName;
+    }
 //    public void addObserver (Observer o) {
 //        observers.add (o);
 //    }
@@ -43,4 +45,3 @@ public class Model {
 //            o.update(this);
 //        }
     }
-}

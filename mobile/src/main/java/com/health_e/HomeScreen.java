@@ -34,11 +34,13 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     String message = "";
     double testData;
     GoogleApiClient googleApiClient;
-
+    Model appData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
+
+        appData=Model.getInstance("Vincent");
 
         location = LocationServices.getFusedLocationProviderClient(this);
 //        Model model = new Model();
