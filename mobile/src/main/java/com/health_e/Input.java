@@ -20,7 +20,7 @@ public class Input extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input);
-        appData=Model.getInstance("s");
+        appData=Model.getInstance(getApplicationContext(),"s");
         Button submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override

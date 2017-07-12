@@ -40,7 +40,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
-        appData=Model.getInstance("Vincent");
+        appData=Model.getInstance(getApplicationContext(),"Vincent");
 
         location = LocationServices.getFusedLocationProviderClient(this);
 //        Model model = new Model();
