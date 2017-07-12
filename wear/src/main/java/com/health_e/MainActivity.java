@@ -9,6 +9,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
 import java.nio.ByteBuffer;
+import java.sql.Time;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,10 +38,17 @@ public class MainActivity extends Activity implements SensorEventListener {
     float gravity[]={0f,0f,0f};
     float linear_acceleration[] = {0f,0f,0f};
     double totAcc;
+    double fallAcc;
+    double counter=0;
+    double threshold = 5;
     String nodeId;
     final int CONNECTION_TIME_OUT_MS = 5000;
     String MESSAGE = "Hello from the other world!";
     double senseArray[] = {1.2,3.4,5.6,7.8,9.1};
+
+    AlertDialog popup;
+    CountDownTimer time;
+    long[] pattern = {400, 400};
 
     TextView xvalue;
     TextView yvalue;
@@ -49,17 +58,28 @@ public class MainActivity extends Activity implements SensorEventListener {
     private  Sensor sensorAcc;
     private  Sensor sensorHeart;
 
+    Handler handler;
+    int interval= 100; // read sensor data each 1000 ms
+    boolean flag = false;
+    boolean isHandlerLive = false;
+
+    private final Runnable processSensors = new Runnable() {
+        @Override
+        public void run() {
+            // Do work with the sensor values.
+
+            flag = true;
+            // The Runnable is posted to run again here:
+            handler.postDelayed(this, interval);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.round_activity_main);
-        /*final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
-        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
-            @Override
-            public void onLayoutInflated(WatchViewStub stub) {
-                mTextView = (TextView) stub.findViewById(R.id.text);
-            }
-        });*/
+
+        handler = new Handler();
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensorAcc = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -71,85 +91,114 @@ public class MainActivity extends Activity implements SensorEventListener {
         yvalue = (TextView) findViewById(R.id.ValY);
         zvalue = (TextView) findViewById(R.id.ValZ);
 
-        Button sendBtn = (Button) findViewById(R.id.sendBtn);
-        sendBtn.setOnClickListener(new View.OnClickListener() {
-            AlertDialog popup;
-            CountDownTimer time;
-            Vibrator v1 = (Vibrator) getSystemService (Context.VIBRATOR_SERVICE);
-            long[] pattern = {400, 400};
+
+        //Button sendBtn = (Button) findViewById(R.id.sendBtn);
+
+        /*sendBtn.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                v1.vibrate (pattern, 0);
 
-                retrieveDeviceNode();
+            }
+        });
+        */
+
+    }
+
+    public void fallDetectionAction(){
+
+        final Vibrator v1 = (Vibrator) getSystemService (Context.VIBRATOR_SERVICE);
+
+        v1.vibrate (pattern, 0);
+
+        retrieveDeviceNode();
 //                Toast.makeText(getApplicationContext(),"Device Node ID: " + nodeId,Toast.LENGTH_LONG).show();
-                popup = new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("FALL DETECTED!")
-                        .setCancelable(false)
-                        .setMessage ("")
-                        .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                time.cancel();
-                                v1.cancel();
-                                sendToast();
-                            }
-                        })
-                        .setNegativeButton("no", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                time.cancel();
-                                v1.cancel();
-                            }
-                        }).show();
-
-                time = new CountDownTimer(10000, 1000) {
+        popup = new AlertDialog.Builder(MainActivity.this)
+                .setTitle("FALL DETECTED!")
+                .setCancelable(false)
+                .setMessage ("")
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onTick(long millisUntilFinished) {
-                        popup.setMessage("Do you need help?\n" +
-                                (int) millisUntilFinished / 1000 + " seconds remaining");
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        popup.cancel();
+                    public void onClick(DialogInterface dialog, int which) {
+                        time.cancel();
                         v1.cancel();
                         sendToast();
                     }
-                }.start();
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        time.cancel();
+                        v1.cancel();
+                    }
+                }).show();
+
+        time = new CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                popup.setMessage("Do you need help?\n" +
+                        (int) millisUntilFinished / 1000 + " seconds remaining");
             }
-        });
+
+            @Override
+            public void onFinish() {
+                popup.cancel();
+                v1.cancel();
+                sendToast();
+            }
+        }.start();
+
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        handler.post(processSensors);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event)
     {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            final float alpha = (float) 0.8;
-            // Isolate the force of gravity with the low-pass filter.
-            gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-            gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-            gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+        if (flag) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                final float alpha = (float) 0.8;
+                // Isolate the force of gravity with the low-pass filter.
+                gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
+                gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
+                gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+
+                // Remove the gravity contribution with the high-pass filter.
+                linear_acceleration[0] = event.values[0] - gravity[0];
+                linear_acceleration[1] = event.values[1] - gravity[1];
+                linear_acceleration[2] = event.values[2] - gravity[2];
+
+                totAcc = Math.sqrt( linear_acceleration[0]*linear_acceleration[0] +
+                                    linear_acceleration[1]*linear_acceleration[1] +
+                                    linear_acceleration[2]*linear_acceleration[2]);
+
+                fallAcc = linear_acceleration[2] / totAcc;
 
 
-            // Remove the gravity contribution with the high-pass filter.
-            linear_acceleration[0] = event.values[0] - gravity[0];
-            linear_acceleration[1] = event.values[1] - gravity[1];
-            linear_acceleration[2] = event.values[2] - gravity[2];
+                xvalue.setText(String.valueOf(totAcc));
+    //            yvalue.setText(String.valueOf(0));
+                //zvalue.setText(String.valueOf(0));
+            }
+            if (event.sensor.getType() == Sensor.TYPE_HEART_RATE) {
+                yvalue.setText(String.valueOf(event.values[0]));
+            }
+            flag = false;
 
-            totAcc = Math.sqrt( linear_acceleration[0]*linear_acceleration[0] +
-                                linear_acceleration[1]*linear_acceleration[1] +
-                                linear_acceleration[2]*linear_acceleration[2]);
+            if (totAcc > threshold) {
+                counter = counter + 1;
+            } else {
+                counter = 0;
+            }
 
-            xvalue.setText(String.valueOf(totAcc));
-//            yvalue.setText(String.valueOf(0));
-            zvalue.setText(String.valueOf(0));
+            if (counter == 5){
+                fallDetectionAction();
+            }
         }
-        if (event.sensor.getType() == Sensor.TYPE_HEART_RATE) {
 
-            yvalue.setText(String.valueOf(event.values[0]));
-
-        }
     }
 
     @Override
