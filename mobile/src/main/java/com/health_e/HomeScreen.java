@@ -15,6 +15,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.telephony.PhoneStateListener;
 
@@ -40,7 +41,11 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
-        appData=Model.getInstance(getApplicationContext(),"Vincent");
+        appData=Model.getInstance(getApplicationContext());
+
+        TextView test = (TextView) findViewById(R.id.textView4);
+        test.setText (appData.getUserName());
+
 
         location = LocationServices.getFusedLocationProviderClient(this);
 //        Model model = new Model();

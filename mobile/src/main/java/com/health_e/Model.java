@@ -16,13 +16,11 @@ public class Model {
     private static Context mCtx;
     private static File mfile;
     private static File mHistory;
-    String userName, emerName;
-    int age, emer_num;
+    String userName = "name", emer_name = "John Smith", age = "24", emer_num = "2121";
     int hr, temp;
 //    Vector<Observer> observers;
 
-    private Model(Context context, String username) {
-        userName=username;
+    private Model(Context context) {
         //
         FileOutputStream outputStream;
         try{
@@ -49,9 +47,9 @@ public class Model {
 
 
 
-    public static synchronized Model getInstance(Context context,String uname ){
+    public static synchronized Model getInstance(Context context){
         if (singletonModel==null){
-            singletonModel= new Model(context,uname);
+            singletonModel= new Model(context);
         }
         return singletonModel;
     }
@@ -59,11 +57,19 @@ public class Model {
 
     public int getTemp() { return temp; }
     public int getHR() { return hr; }
-    public void setTemp(int t) { temp = t; }
-    public void setHR(int h) { hr = h; }
     public String getUserName(){
         return userName;
     }
+    public String getAge() { return age; }
+    public String getEmerName() { return emer_name; }
+    public String getEmerNum () { return emer_num; }
+
+    public void setTemp(int t) { temp = t; }
+    public void setHR(int h) { hr = h; }
+    public void setName (String s) { userName = s; }
+    public void setAge (String s) { age = s; }
+    public void setEmerName (String s) { emer_name = s; }
+    public void setEmerNum (String s) { emer_num = s; }
 //    public void addObserver (Observer o) {
 //        observers.add (o);
 //    }
