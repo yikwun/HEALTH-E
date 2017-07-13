@@ -1,6 +1,8 @@
 package com.health_e;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,7 +12,7 @@ import java.io.Serializable;
 import java.util.Observable;
 import java.util.Vector;
 
-public class Model implements Serializable {
+public class Model implements Parcelable {
     private static final String mfileName="appData";
     private static final String mHistoryName="history";
     private static Model singletonModel;
@@ -21,6 +23,11 @@ public class Model implements Serializable {
     private int hr, temp;
     private double lat, lon;
 //    Vector<Observer> observers;
+
+    // used for serializable or parcelable, whichever we decide to use
+//    protected Object readResolve() {
+//        return singletonModel;
+//    }
 
     private Model(Context context) {
         //
@@ -77,6 +84,34 @@ public class Model implements Serializable {
     public void setLocation (double la, double lo) {
         lat = la;
         lon = lo;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel (Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(age);
+        dest.writeString(emer_name);
+        dest.writeString(emer_num);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public RegistrationPogo createFromParcel(Parcel in) {
+            return new RegistrationPogo(in);
+        }
+        public RegistrationPogo[] newArray(int size) {
+            return new RegistrationPogo[size];
+        }
+    };
+
+    private static class RegistrationPogo {
+        RegistrationPogo(Parcel in) {
+
+        }
     }
 //    public void addObserver (Observer o) {
 //        observers.add (o);
