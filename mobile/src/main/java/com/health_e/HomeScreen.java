@@ -2,6 +2,7 @@ package com.health_e;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -10,11 +11,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.PermissionChecker;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.telephony.PhoneStateListener;
@@ -41,14 +45,80 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
-        appData=Model.getInstance(getApplicationContext());
+        appData = Model.getInstance(getApplicationContext());
 
-        TextView test = (TextView) findViewById(R.id.textView4);
-        test.setText (appData.getUserName());
+        if (appData.getName() == "def_name") {
+            final EditText nameInput = new EditText (this);
+            nameInput.setInputType(InputType.TYPE_CLASS_TEXT);
 
+            final EditText ageInput = new EditText (this);
+            ageInput.setInputType (InputType.TYPE_CLASS_NUMBER);
+
+            final EditText contactInput = new EditText (this);
+            contactInput.setInputType (InputType.TYPE_CLASS_TEXT);
+
+            final EditText contactNumInput = new EditText (this);
+            contactNumInput.setInputType (InputType.TYPE_CLASS_NUMBER);
+
+            AlertDialog nameDialog, ageDialog, contactDialog, contactNumDialog;
+
+            AlertDialog.Builder name = new AlertDialog.Builder (this);
+            name.setMessage ("What is your name?")
+                    .setTitle ("Welcome to HEALTH-E")
+                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            appData.setName (nameInput.getText().toString());
+                        }
+                    })
+                    .setView (nameInput);
+
+            AlertDialog.Builder age = new AlertDialog.Builder (this);
+            age.setMessage ("How old are you?")
+                    .setTitle ("Welcome to HEALTH-E")
+                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            appData.setAge (ageInput.getText().toString());
+                        }
+                    })
+                    .setView (ageInput);
+
+            AlertDialog.Builder contact = new AlertDialog.Builder (this);
+            contact.setMessage ("Emergency Contact Name")
+                    .setTitle ("Welcome to HEALTH-E")
+                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            appData.setEmerName(contactInput.getText().toString());
+                        }
+                    })
+                    .setView (contactInput);
+
+
+            AlertDialog.Builder contactNum = new AlertDialog.Builder (this);
+            contactNum.setMessage ("Emergency Contact Number")
+                    .setTitle ("Welcome to HEALTH-E")
+                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            appData.setEmerNum(contactNumInput.getText().toString());
+                        }
+                    })
+                    .setView (contactNumInput);
+
+            nameDialog = name.create();
+            ageDialog = age.create();
+            contactDialog = contact.create();
+            contactNumDialog = contactNum.create();
+
+            contactNumDialog.show();
+            contactDialog.show();
+            ageDialog.show();
+            nameDialog.show();
+        }
 
         location = LocationServices.getFusedLocationProviderClient(this);
-//        Model model = new Model();
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
@@ -90,11 +160,27 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                                 @Override
                                 public void onSuccess(Location l) {
                                     if (l != null) {
+                                        appData.setLocation (l.getLatitude(), l.getLongitude());
+                                        TextView t = (TextView) findViewById(R.id.textView4);
+                                        t.setText ("location found");
+
+                                        TextView lat = (TextView) findViewById(R.id.textView5);
+                                        lat.setText (Double.toString (appData.getLat()));
+
+                                        TextView lon = (TextView) findViewById(R.id.textView6);
+                                        lon.setText (Double.toString (appData.getLon()));
                                         // Location found, send to model
                                         // https://stackoverflow.com/questions/1513485/how-do-i-get-the-current-gps-location-programmatically-in-android
+                                    } else {
+                                        TextView t = (TextView) findViewById(R.id.textView4);
+                                        t.setText("location not found");
                                     }
                                 }
                             });
+                } else {
+                    ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+                    TextView t = (TextView) findViewById(R.id.textView4);
+                    t.setText ("permissions missing");
                 }
             }
 //            AlertDialog popup;
@@ -143,7 +229,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                 .getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
         Intent callIntent = new Intent(Intent.ACTION_CALL);
-        callIntent.setData(Uri.parse("tel:4166708515"));
+        callIntent.setData(Uri.parse("tel:" + appData.getEmerNum()));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALLPHONE);
         } else {
@@ -157,7 +243,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
-                    callIntent.setData(Uri.parse("tel:2267917318"));
+                    callIntent.setData(Uri.parse("tel:" + appData.getEmerNum()));
                     if (PermissionChecker.checkSelfPermission(HomeScreen.this, "android.permission.CALL_PHONE") ==
                             PermissionChecker.PERMISSION_GRANTED) {
                         startActivity(callIntent);

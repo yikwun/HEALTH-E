@@ -22,6 +22,7 @@ import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -53,6 +54,23 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String s = value.toString();
+            String id = preference.getKey();
+
+            switch (id) {
+                case "name":
+                    Model.getInstance (preference.getContext()).setName(s);
+                    break;
+                case "age":
+                    Model.getInstance(preference.getContext()).setAge(s);
+                    break;
+                case "contact_name":
+                    Model.getInstance (preference.getContext()).setEmerName(s);
+                    break;
+                case "contact_number":
+                    Model.getInstance(preference.getContext()).setEmerNum(s);
+                    break;
+            }
+
             preference.setSummary (s);
             return true;
         }
@@ -78,7 +96,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         switch (id) {
             case "name":
-                editor.putString (preference.getKey(), Model.getInstance(preference.getContext()).getUserName());
+                editor.putString (preference.getKey(), Model.getInstance(preference.getContext()).getName());
                 break;
             case "age":
                 editor.putString (preference.getKey(), Model.getInstance(preference.getContext()).getAge());
@@ -86,12 +104,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             case "contact_name":
                 editor.putString (preference.getKey(), Model.getInstance(preference.getContext()).getEmerName());
                 break;
-            case "contact_num":
+            case "contact_number":
                 editor.putString (preference.getKey(), Model.getInstance(preference.getContext()).getEmerNum());
                 break;
         }
 
-        editor.commit();
+        editor.apply();
 
         // Trigger the listener immediately with the preference's
         // current value.

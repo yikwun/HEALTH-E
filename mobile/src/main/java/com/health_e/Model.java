@@ -6,18 +6,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Observable;
 import java.util.Vector;
 
-public class Model {
+public class Model implements Serializable {
     private static final String mfileName="appData";
     private static final String mHistoryName="history";
     private static Model singletonModel;
     private static Context mCtx;
     private static File mfile;
     private static File mHistory;
-    String userName = "name", emer_name = "John Smith", age = "24", emer_num = "2121";
-    int hr, temp;
+    private String name = "def_name", emer_name = "def_contact", age = "def_age", emer_num = "def_contact_num";
+    private int hr, temp;
+    private double lat, lon;
 //    Vector<Observer> observers;
 
     private Model(Context context) {
@@ -26,7 +28,7 @@ public class Model {
         try{
             outputStream=context.openFileOutput(mfileName,Context.MODE_PRIVATE);
 
-            outputStream.write(userName.getBytes());
+            outputStream.write(name.getBytes());
 
         }catch (FileNotFoundException e){
             mfile= new File(context.getFilesDir(),mfileName);
@@ -57,19 +59,25 @@ public class Model {
 
     public int getTemp() { return temp; }
     public int getHR() { return hr; }
-    public String getUserName(){
-        return userName;
+    public String getName(){
+        return name;
     }
     public String getAge() { return age; }
     public String getEmerName() { return emer_name; }
     public String getEmerNum () { return emer_num; }
+    public double getLat() { return lat; }
+    public double getLon() { return lon; }
 
     public void setTemp(int t) { temp = t; }
     public void setHR(int h) { hr = h; }
-    public void setName (String s) { userName = s; }
+    public void setName (String s) { name = s; }
     public void setAge (String s) { age = s; }
     public void setEmerName (String s) { emer_name = s; }
     public void setEmerNum (String s) { emer_num = s; }
+    public void setLocation (double la, double lo) {
+        lat = la;
+        lon = lo;
+    }
 //    public void addObserver (Observer o) {
 //        observers.add (o);
 //    }

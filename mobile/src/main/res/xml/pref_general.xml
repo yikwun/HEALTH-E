@@ -8,7 +8,6 @@
         android:key="name"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:summary="name"
         android:title="@string/pref_title_name" />
     <EditTextPreference
         android:defaultValue="25"
@@ -18,17 +17,14 @@
         android:numeric="integer"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:summary="age"
         android:title="@string/pref_title_age" />
     <EditTextPreference
         android:capitalize="words"
-        android:defaultValue="@string/pref_default_contact_name"
         android:inputType="textCapWords"
         android:key="contact_name"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:summary="contact_name"
         android:title="@string/pref_title_contact_name" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
@@ -37,14 +33,12 @@
     <EditTextPreference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:defaultValue="@string/pref_default_contact_number"
-        android:inputType="phone"
+        android:inputType="number"
         android:key="contact_number"
         android:maxLength="10"
         android:phoneNumber="true"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:summary="contact_number"
         android:title="@string/pref_title_contact_number" />
 
 </PreferenceScreen>

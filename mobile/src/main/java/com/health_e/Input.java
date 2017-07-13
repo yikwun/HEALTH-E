@@ -45,7 +45,7 @@ public class Input extends AppCompatActivity {
         else {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(phoneNo, null, message, null, null);
-            Toast.makeText(getApplicationContext(),appData.getUserName(),
+            Toast.makeText(getApplicationContext(),appData.getName(),
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -60,7 +60,7 @@ public class Input extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getApplicationContext(),
-                            "SMS faild, please try again.", Toast.LENGTH_LONG).show();
+                            "SMS failed, please try again.", Toast.LENGTH_LONG).show();
                     return;
                 }
             }
