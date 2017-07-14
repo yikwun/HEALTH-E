@@ -4,8 +4,11 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,8 +28,15 @@ import android.widget.Toast;
 import android.telephony.PhoneStateListener;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
@@ -68,6 +78,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     .setTitle ("WARNING")
                     .setMessage ("The field is empty!")
                     .setPositiveButton("Okay", null)
+                    .setCancelable(false)
                     .create();
 
             final AlertDialog name = new AlertDialog.Builder(this)
@@ -75,6 +86,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     .setTitle ("Welcome to HEALTH-E")
                     .setPositiveButton("Next", null)
                     .setView (nameInput)
+                    .setCancelable(false)
                     .create();
 
             final AlertDialog age = new AlertDialog.Builder (this)
@@ -82,6 +94,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     .setTitle ("Welcome to HEALTH-E")
                     .setPositiveButton("Next", null)
                     .setView (ageInput)
+                    .setCancelable(false)
                     .create();
 
             final AlertDialog contact = new AlertDialog.Builder (this)
@@ -89,6 +102,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     .setTitle ("Welcome to HEALTH-E")
                     .setPositiveButton("Next", null)
                     .setView (contactInput)
+                    .setCancelable(false)
                     .create();
 
             final AlertDialog contactNum = new AlertDialog.Builder (this)
@@ -96,6 +110,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     .setTitle ("Welcome to HEALTH-E")
                     .setPositiveButton("Next", null)
                     .setView (contactNumInput)
+                    .setCancelable(false)
                     .create();
 
             contactNum.show();
@@ -159,9 +174,54 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         location = LocationServices.getFusedLocationProviderClient(this);
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
+                .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .build();
 
+        /*****************************/
+        // TODO: Currently working on this
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(30 * 1000);
+        locationRequest.setFastestInterval(5 * 1000);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(HomeScreen.this, 2);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+                }
+            }
+        });
+
+        LocationManager lm = (LocationManager) this.getSystemService (Context.LOCATION_SERVICE);
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setMessage ("To continue, turn on location services")
+                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setNegativeButton("cancel", null)
+                    .create();
+            dialog.show();
+        }
+        /*****************************/
 
         Button settings = (Button) findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
@@ -197,21 +257,20 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                             .addOnSuccessListener(HomeScreen.this, new OnSuccessListener<Location>() {
                                 @Override
                                 public void onSuccess(Location l) {
+                                    TextView t = (TextView) findViewById(R.id.textView);
                                     if (l != null) {
                                         appData.setLocation (l.getLatitude(), l.getLongitude());
-                                        TextView t = (TextView) findViewById(R.id.textView);
-                                        t.setText (appData.getLocation());
+                                        t.setText (appData.getLocation(HomeScreen.this));
 
                                         // location found
                                         // https://stackoverflow.com/questions/1513485/how-do-i-get-the-current-gps-location-programmatically-in-android
                                     } else {
-
                                         // location not found
+                                        t.setText ("location unavailable");
                                     }
                                 }
                             });
                 } else {
-
                     // Permissions missing
                     ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
                 }
@@ -390,7 +449,6 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
                     isPhoneCalling = false;
                 }
-
             }
         }
     }

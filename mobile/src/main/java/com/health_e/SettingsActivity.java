@@ -260,7 +260,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 //            Set<BluetoothDevice> devices = adapter.getBondedDevices();
 //            List<String> names = new ArrayList();
 //            for (BluetoothDevice d : devices) {
-//                names.add(Vincend.getName());
+//                names.add(d.getName());
 //            }
 //
 //            // Set the summary

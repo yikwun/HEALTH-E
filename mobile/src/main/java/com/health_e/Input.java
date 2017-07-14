@@ -38,6 +38,8 @@ public class Input extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (temp.getText().toString().length() > 0 && blood.getText().toString().length() > 0) {
+                    appData.setTemp (Integer.valueOf(temp.getText().toString()));
+                    appData.setBP (Integer.valueOf (blood.getText().toString()));
                     sendSMSMessage();
                     finish();
                 } else {
@@ -59,17 +61,18 @@ public class Input extends AppCompatActivity {
 
     protected void sendSMSMessage() {
         Calendar c = Calendar.getInstance();
+        int am = c.get(Calendar.AM_PM);
         int hour = c.get(Calendar.HOUR);
         int minute = c.get(Calendar.MINUTE);
-        int am = c.get(Calendar.AM_PM);
 
         String AM = ((am == Calendar.AM) ? "AM" : "PM");
         String HOUR = ((hour == 0) ? "12" : Integer.toString (hour));
-        String MINUTE = Integer.toString (minute);
+        String MINUTE = ((minute < 10) ? "0".concat (Integer.toString (minute)) : Integer.toString (minute));
 
         String phoneNo = appData.getEmerNum();
-        String message = appData.getName() + ", age " + appData.getAge() + ", has encountered a problem at "
-                + appData.getLocation() + " at " + HOUR + ":" + MINUTE + " " + AM;
+        String message = appData.getName() + ", age " + appData.getAge() + ", has saved their daily information "
+                + appData.getLocation(this) + " at " + HOUR + ":" + MINUTE + " " + AM + ". Temperature: "
+                + appData.getTemp() + ", blood pressure: " + appData.getBP();
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.SEND_SMS)
