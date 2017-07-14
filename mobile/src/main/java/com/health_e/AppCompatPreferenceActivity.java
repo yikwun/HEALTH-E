@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i("AppCompatPreference","onCreate");
         getDelegate().installViewFactory();
         getDelegate().onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);
@@ -87,12 +89,18 @@ public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        Log.i("AppCompatPreference","onStop");
         getDelegate().onStop();
     }
-
+    @Override
+    protected void onPause(){
+        super.onPause();
+        Log.i("AppCompatPreference","onPause");
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.i("AppCompatPreference","onDestroy");
         getDelegate().onDestroy();
     }
 

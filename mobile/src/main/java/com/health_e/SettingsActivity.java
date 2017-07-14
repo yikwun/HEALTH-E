@@ -122,9 +122,27 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i("SettingActivity", "onCreate");
         setupActionBar();
         appData = Model.getInstance(getApplicationContext());
     }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        Log.i("SettingActivity", "onPause");
+    }
+    protected void onStop(){
+        super.onStop();
+        Log.i("SettingActivity", "onStop");
+    }
+
+    protected void onDestroy(){
+        super.onDestroy();
+        Log.i("SettingActivity", "onDestroy");
+    }
+
+
 
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
@@ -241,7 +259,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 //            Set<BluetoothDevice> devices = adapter.getBondedDevices();
 //            List<String> names = new ArrayList();
 //            for (BluetoothDevice d : devices) {
-//                names.add(d.getName());
+//                names.add(Vincend.getName());
 //            }
 //
 //            // Set the summary

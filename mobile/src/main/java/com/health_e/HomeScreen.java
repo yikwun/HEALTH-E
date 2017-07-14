@@ -45,7 +45,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
-
+        Log.i("HomeScreen","OnCreate");
         appData = Model.getInstance(getApplicationContext());
 
         // First time the app is loaded
@@ -291,14 +291,21 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     }
 
     @Override
+    protected  void onPause(){
+        super.onPause();
+        Log.i("HomeScreen","onPause");
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
+        Log.i("HomeScreen","OnStart");
         googleApiClient.connect();
     }
 
     @Override
     public void onStop() {
-
+        Log.i("HomeScreen","OnStop");
         if (null != googleApiClient && googleApiClient.isConnected()) {
             Wearable.MessageApi.removeListener(googleApiClient, this);
             googleApiClient.disconnect();
