@@ -1,6 +1,8 @@
 package com.health_e;
 
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -9,6 +11,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Vector;
 
@@ -30,6 +34,7 @@ public class Model implements Parcelable {
 //    }
 
     private Model(Context context) {
+        mCtx = context;
         //
         FileOutputStream outputStream;
         try{
@@ -73,8 +78,18 @@ public class Model implements Parcelable {
     public String getEmerName() { return emer_name; }
     public String getEmerNum () { return emer_num; }
     public String getLocation() {
+        Geocoder geo = new Geocoder(mCtx, Locale.getDefault());
+        try {
+            List<Address> addresses = geo.getFromLocation(lat, lon, 1);
+            String address = addresses.get(0).getAddressLine(0);
+            String city = addresses.get(0).getLocality();
+            String prov = addresses.get(0).getAdminArea();
+            String loc = address.concat (", " + city + ", " + prov);
+            return loc;
+        } catch (Exception e) {
+        }
         // need to determine location and put into string rather than keep lat and lon
-        return "";
+        return "location unavailable";
     }
 
     public void setTemp(int t) { temp = t; }

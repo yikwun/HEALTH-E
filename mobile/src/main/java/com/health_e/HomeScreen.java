@@ -199,6 +199,8 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                                 public void onSuccess(Location l) {
                                     if (l != null) {
                                         appData.setLocation (l.getLatitude(), l.getLongitude());
+                                        TextView t = (TextView) findViewById(R.id.textView);
+                                        t.setText (appData.getLocation());
 
                                         // location found
                                         // https://stackoverflow.com/questions/1513485/how-do-i-get-the-current-gps-location-programmatically-in-android
