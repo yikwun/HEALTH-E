@@ -14,6 +14,7 @@ import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
+import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -47,75 +48,112 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
         appData = Model.getInstance(getApplicationContext());
 
+        // First time the app is loaded
         if (appData.getName() == "def_name") {
             final EditText nameInput = new EditText (this);
             nameInput.setInputType(InputType.TYPE_CLASS_TEXT);
 
             final EditText ageInput = new EditText (this);
             ageInput.setInputType (InputType.TYPE_CLASS_NUMBER);
+            ageInput.setFilters (new InputFilter[] { new InputFilter.LengthFilter (3)});
 
             final EditText contactInput = new EditText (this);
             contactInput.setInputType (InputType.TYPE_CLASS_TEXT);
 
             final EditText contactNumInput = new EditText (this);
             contactNumInput.setInputType (InputType.TYPE_CLASS_NUMBER);
+            contactNumInput.setFilters (new InputFilter[] { new InputFilter.LengthFilter (11)});
 
-            AlertDialog nameDialog, ageDialog, contactDialog, contactNumDialog;
+            final AlertDialog warn = new AlertDialog.Builder(this)
+                    .setTitle ("WARNING")
+                    .setMessage ("The field is empty!")
+                    .setPositiveButton("Okay", null)
+                    .create();
 
-            AlertDialog.Builder name = new AlertDialog.Builder (this);
-            name.setMessage ("What is your name?")
+            final AlertDialog name = new AlertDialog.Builder(this)
+                    .setMessage ("What is your name?")
                     .setTitle ("Welcome to HEALTH-E")
-                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            appData.setName (nameInput.getText().toString());
-                        }
-                    })
-                    .setView (nameInput);
+                    .setPositiveButton("Next", null)
+                    .setView (nameInput)
+                    .create();
 
-            AlertDialog.Builder age = new AlertDialog.Builder (this);
-            age.setMessage ("How old are you?")
+            final AlertDialog age = new AlertDialog.Builder (this)
+                    .setMessage ("How old are you?")
                     .setTitle ("Welcome to HEALTH-E")
-                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            appData.setAge (ageInput.getText().toString());
-                        }
-                    })
-                    .setView (ageInput);
+                    .setPositiveButton("Next", null)
+                    .setView (ageInput)
+                    .create();
 
-            AlertDialog.Builder contact = new AlertDialog.Builder (this);
-            contact.setMessage ("Emergency Contact Name")
+            final AlertDialog contact = new AlertDialog.Builder (this)
+                    .setMessage ("Emergency Contact Name")
                     .setTitle ("Welcome to HEALTH-E")
-                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            appData.setEmerName(contactInput.getText().toString());
-                        }
-                    })
-                    .setView (contactInput);
+                    .setPositiveButton("Next", null)
+                    .setView (contactInput)
+                    .create();
 
-
-            AlertDialog.Builder contactNum = new AlertDialog.Builder (this);
-            contactNum.setMessage ("Emergency Contact Number")
+            final AlertDialog contactNum = new AlertDialog.Builder (this)
+                    .setMessage ("Emergency Contact Number")
                     .setTitle ("Welcome to HEALTH-E")
-                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            appData.setEmerNum(contactNumInput.getText().toString());
-                        }
-                    })
-                    .setView (contactNumInput);
+                    .setPositiveButton("Next", null)
+                    .setView (contactNumInput)
+                    .create();
 
-            nameDialog = name.create();
-            ageDialog = age.create();
-            contactDialog = contact.create();
-            contactNumDialog = contactNum.create();
+            contactNum.show();
+            contact.show();
+            age.show();
+            name.show();
 
-            contactNumDialog.show();
-            contactDialog.show();
-            ageDialog.show();
-            nameDialog.show();
+            name.getButton (AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick (View v) {
+                    String s = nameInput.getText().toString();
+                    if (s.length() > 0) {
+                        appData.setName(s);
+                        name.dismiss();
+                    } else {
+                        warn.show();
+                    }
+                }
+            });
+
+            age.getButton (AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick (View v) {
+                    String s = ageInput.getText().toString();
+                    if (s.length() > 0) {
+                        appData.setAge(s);
+                        age.dismiss();
+                    } else {
+                        warn.show();
+                    }
+                }
+            });
+
+            contact.getButton (AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick (View v) {
+                    String s = contactInput.getText().toString();
+                    if (s.length() > 0) {
+                        appData.setEmerName(s);
+                        contact.dismiss();
+                    } else {
+                        warn.show();
+                    }
+                }
+            });
+
+            contactNum.getButton (AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick (View v) {
+                    String s = contactNumInput.getText().toString();
+                    if (s.length() > 0) {
+                        appData.setEmerNum(s);
+                        contactNum.dismiss();
+                    } else {
+                        warn.show();
+                    }
+                }
+            });
         }
 
         location = LocationServices.getFusedLocationProviderClient(this);
@@ -161,26 +199,19 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                                 public void onSuccess(Location l) {
                                     if (l != null) {
                                         appData.setLocation (l.getLatitude(), l.getLongitude());
-                                        TextView t = (TextView) findViewById(R.id.textView4);
-                                        t.setText ("location found");
 
-                                        TextView lat = (TextView) findViewById(R.id.textView5);
-                                        lat.setText (Double.toString (appData.getLat()));
-
-                                        TextView lon = (TextView) findViewById(R.id.textView6);
-                                        lon.setText (Double.toString (appData.getLon()));
-                                        // Location found, send to model
+                                        // location found
                                         // https://stackoverflow.com/questions/1513485/how-do-i-get-the-current-gps-location-programmatically-in-android
                                     } else {
-                                        TextView t = (TextView) findViewById(R.id.textView4);
-                                        t.setText("location not found");
+
+                                        // location not found
                                     }
                                 }
                             });
                 } else {
+
+                    // Permissions missing
                     ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
-                    TextView t = (TextView) findViewById(R.id.textView4);
-                    t.setText ("permissions missing");
                 }
             }
 //            AlertDialog popup;

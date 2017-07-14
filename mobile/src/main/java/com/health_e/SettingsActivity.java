@@ -260,12 +260,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 //                s = s.substring(0, s.length() - 2);
 //                pref.setKey (s);
 //            }
-//
-//            // Update the preference's current value
-//            sBindPreferenceSummaryToValueListener.onPreferenceChange(pref,
-//                    PreferenceManager
-//                            .getDefaultSharedPreferences(pref.getContext())
-//                            .getString(pref.getKey(), ""));
 //            // **********************
         }
 

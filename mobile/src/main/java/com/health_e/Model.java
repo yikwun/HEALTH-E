@@ -72,8 +72,10 @@ public class Model implements Parcelable {
     public String getAge() { return age; }
     public String getEmerName() { return emer_name; }
     public String getEmerNum () { return emer_num; }
-    public double getLat() { return lat; }
-    public double getLon() { return lon; }
+    public String getLocation() {
+        // need to determine location and put into string rather than keep lat and lon
+        return "";
+    }
 
     public void setTemp(int t) { temp = t; }
     public void setHR(int h) { hr = h; }
