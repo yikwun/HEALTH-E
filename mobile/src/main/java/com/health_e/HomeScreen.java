@@ -294,6 +294,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     protected  void onPause(){
         super.onPause();
         Log.i("HomeScreen","onPause");
+        appData.savetoFile(getApplicationContext());
     }
 
     @Override
@@ -301,6 +302,11 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         super.onStart();
         Log.i("HomeScreen","OnStart");
         googleApiClient.connect();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("HomeScreen","onDestroy");
     }
 
     @Override

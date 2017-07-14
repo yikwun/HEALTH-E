@@ -5,18 +5,23 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Observable;
 import java.util.Vector;
 
-public class Model implements Parcelable {
+public class Model implements Serializable {
     private static final String mfileName="appData";
     private static final String mHistoryName="history";
     private static Model singletonModel;
@@ -34,38 +39,79 @@ public class Model implements Parcelable {
 //    }
 
     private Model(Context context) {
-        mCtx = context;
-        //
-        FileOutputStream outputStream;
-        try{
-            outputStream=context.openFileOutput(mfileName,Context.MODE_PRIVATE);
 
-            outputStream.write(name.getBytes());
+        readfromFile(context);
+//        mCtx = context;
+//        //
+//        FileOutputStream outputStream;
+//        try{
+//            outputStream=context.openFileOutput(mfileName,Context.MODE_PRIVATE);
+//
+//            outputStream.write(name.getBytes());
+//
+//        }catch (FileNotFoundException e){
+//            try {
+//                mfile.createNewFile();
+//            } catch (IOException e1) {
+//                e1.printStackTrace();
+//            }
+//
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//        }
 
-        }catch (FileNotFoundException e){
-            mfile= new File(context.getFilesDir(),mfileName);
-            try {
-                mfile.createNewFile();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-
-
-        //
     }
-
-
 
     public static synchronized Model getInstance(Context context){
         if (singletonModel==null){
             singletonModel= new Model(context);
         }
         return singletonModel;
+    }
+
+    public void savetoFile(Context context){
+        try {
+            FileOutputStream fileOutputStream = context.openFileOutput(mfileName, Context.MODE_PRIVATE);
+            ObjectOutputStream objectOutputStream= new ObjectOutputStream((fileOutputStream));
+            objectOutputStream.writeObject(this);
+            objectOutputStream.close();
+            fileOutputStream.close();
+        }
+        catch (FileNotFoundException e) {
+            Log.e("Model","FileNotFound");
+
+            e.printStackTrace();
+        }
+        catch (IOException e){
+
+        }
+    }
+
+    public void readfromFile(Context context){
+        try{
+            FileInputStream fileInputStream = context.openFileInput(mfileName);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            singletonModel = (Model) objectInputStream.readObject();
+            objectInputStream.close();
+            fileInputStream.close();
+            this.name=singletonModel.name;
+            this.age=singletonModel.age;
+            this.emer_name=singletonModel.emer_name;
+            this.emer_num=singletonModel.emer_num;
+        }
+        catch (FileNotFoundException e) {
+            Log.e("Model","FileNotFound");
+            mfile= new File(context.getFilesDir(),mfileName);
+            e.printStackTrace();
+        }
+        catch (IOException e){
+
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();}
+
+
     }
 
 
@@ -92,7 +138,7 @@ public class Model implements Parcelable {
         return "location unavailable";
     }
 
-    public void setTemp(int t) { temp = t; }
+    public void setTemp(int t) { temp = t;}
     public void setHR(int h) { hr = h; }
     public void setName (String s) { name = s; }
     public void setAge (String s) { age = s; }
@@ -103,32 +149,32 @@ public class Model implements Parcelable {
         lon = lo;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+//    @Override
+//    public int describeContents() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public void writeToParcel (Parcel dest, int flags) {
+//        dest.writeString(name);
+//        dest.writeString(age);
+//        dest.writeString(emer_name);
+//        dest.writeString(emer_num);
+//    }
 
-    @Override
-    public void writeToParcel (Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeString(age);
-        dest.writeString(emer_name);
-        dest.writeString(emer_num);
-    }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public RegistrationPogo createFromParcel(Parcel in) {
-            return new RegistrationPogo(in);
-        }
-        public RegistrationPogo[] newArray(int size) {
-            return new RegistrationPogo[size];
-        }
-    };
-
-    private static class RegistrationPogo {
-        RegistrationPogo(Parcel in) {
-
-        }
+//    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+//        public RegistrationPogo createFromParcel(Parcel in) {
+//            return new RegistrationPogo(in);
+//        }
+//        public RegistrationPogo[] newArray(int size) {
+//            return new RegistrationPogo[size];
+//        }
+//    };
+//
+//    private static class RegistrationPogo {
+//        RegistrationPogo(Parcel in) {
+//
+//        }
     }
 //    public void addObserver (Observer o) {
 //        observers.add (o);
@@ -142,4 +188,4 @@ public class Model implements Parcelable {
 //        for (Observer o: this.observers) {
 //            o.update(this);
 //        }
-    }
+

@@ -134,6 +134,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     }
     protected void onStop(){
         super.onStop();
+        appData.savetoFile(getApplicationContext());
         Log.i("SettingActivity", "onStop");
     }
 
