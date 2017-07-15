@@ -12,7 +12,6 @@
         android:id="@+id/preference"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:summary="@string/pref_default_watch_connect"
         android:title="@string/pref_title_watch_connect">
         <intent android:action="android.settings.BLUETOOTH_SETTINGS" />
     </Preference>
