@@ -71,8 +71,8 @@ public class Input extends AppCompatActivity {
 
         String phoneNo = appData.getEmerNum();
         String message = appData.getName() + ", age " + appData.getAge() + ", has saved their daily information at "
-                + HOUR + ":" + MINUTE + " " + AM + ". Temperature: "
-                + appData.getTemp() + ", blood pressure: " + appData.getBP();
+                + HOUR + ":" + MINUTE + " " + AM + ". \nTemperature: "
+                + appData.getTemp() + " C \nBlood pressure: " + appData.getBP() + " mmHg";
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.SEND_SMS)

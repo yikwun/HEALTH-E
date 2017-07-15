@@ -312,11 +312,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX (0);
         graph.getViewport().setMaxX (30);
-        series = new LineGraphSeries<>(new DataPoint[] {
-//                new DataPoint (0, 90),
-//                new DataPoint (1, 95),
-//                new DataPoint (2, 75)
-        });
+        series = new LineGraphSeries<>();
         graph.addSeries(series);
     }
 
