@@ -70,8 +70,8 @@ public class Input extends AppCompatActivity {
         String MINUTE = ((minute < 10) ? "0".concat (Integer.toString (minute)) : Integer.toString (minute));
 
         String phoneNo = appData.getEmerNum();
-        String message = appData.getName() + ", age " + appData.getAge() + ", has saved their daily information "
-                + appData.getLocation(this) + " at " + HOUR + ":" + MINUTE + " " + AM + ". Temperature: "
+        String message = appData.getName() + ", age " + appData.getAge() + ", has saved their daily information at "
+                + HOUR + ":" + MINUTE + " " + AM + ". Temperature: "
                 + appData.getTemp() + ", blood pressure: " + appData.getBP();
 
         if (ContextCompat.checkSelfPermission(this,

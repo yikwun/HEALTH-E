@@ -28,7 +28,6 @@ public class Model implements Serializable {
     private double lat, lon;
 
     private Model(Context context) {
-
         readfromFile(context);
     }
 
@@ -112,8 +111,8 @@ public class Model implements Serializable {
             String prov = addresses.get(0).getAdminArea();
             String loc = address.concat(", " + city + ", " + prov);
             return loc;
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
+
         return "location unavailable";
     }
 

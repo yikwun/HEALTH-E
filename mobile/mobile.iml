@@ -137,6 +137,7 @@
     <orderEntry type="library" exported="" scope="TEST" name="javawriter-2.1.1" level="project" />
     <orderEntry type="library" exported="" name="support-v4-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="support-media-compat-25.3.1" level="project" />
+    <orderEntry type="library" exported="" name="graphview-4.2.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-plus-11.0.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-tasks-11.0.0" level="project" />
     <orderEntry type="library" exported="" name="firebase-common-11.0.0" level="project" />

@@ -44,20 +44,25 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.nio.ByteBuffer;
 import java.util.Calendar;
 
 public class HomeScreen extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks {
-    private static final int MY_PERMISSIONS_REQUEST_CALLPHONE = 1;
-    private static final int MY_PERMISSIONS_REQUEST_SMS = 0;
+    static final int MY_PERMISSIONS_REQUEST_CALLPHONE = 1;
+    static final int MY_PERMISSIONS_REQUEST_SMS = 0;
 
-    LocationManager locationManager;
     FusedLocationProviderClient location;
     String message = "";
     double testData;
     GoogleApiClient googleApiClient;
     Model appData;
+    LineGraphSeries<DataPoint> series;
+    GraphView graph;
+    int dataSize = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,60 +191,23 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                 .addConnectionCallbacks(this)
                 .build();
 
-
-        /*****************************/
-        // TODO: Currently working on this
-//        LocationRequest locationRequest = LocationRequest.create();
-//        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-//        locationRequest.setInterval(30 * 1000);
-//        locationRequest.setFastestInterval(5 * 1000);
-//        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-//                .addLocationRequest(locationRequest);
-//        builder.setAlwaysShow(true);
-//        PendingResult<LocationSettingsResult> result =
-//                LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-//        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-//            @Override
-//            public void onResult(LocationSettingsResult result) {
-//                final Status status = result.getStatus();
-//                switch (status.getStatusCode()) {
-//                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-//                        try {
-//                            // Show the dialog by calling startResolutionForResult(),
-//                            // and check the result in onActivityResult().
-//                            status.startResolutionForResult(HomeScreen.this, 2);
-//                        } catch (IntentSender.SendIntentException e) {
-//                            // Ignore the error.
-//                        }
-//                        break;
-//                }
-//            }
-//        });
-
+        // Get location
         if (PermissionChecker.checkSelfPermission(HomeScreen.this, "android.permission.ACCESS_FINE_LOCATION") == PermissionChecker.PERMISSION_GRANTED) {
             location.getLastLocation()
                     .addOnSuccessListener(HomeScreen.this, new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location l) {
-//                            TextView t = (TextView) findViewById(R.id.textView);
                             if (l != null) {
                                 appData.setLocation(l.getLatitude(), l.getLongitude());
-//                                t.setText(appData.getLocation(HomeScreen.this));
 
                                 TextView loc1 = (TextView) findViewById(R.id.location);
-                                String m = "Your location: \n" + appData.getLocation (HomeScreen.this);
-                                loc1.setText (m);
-
-                                // location found
-                                // https://stackoverflow.com/questions/1513485/how-do-i-get-the-current-gps-location-programmatically-in-android
-                            } else {
-                                // location not found
-//                                t.setText("location unavailable");
+                                String m = "Your location: \n" + appData.getLocation(HomeScreen.this);
+                                loc1.setText(m);
                             }
                         }
                     });
         } else {
-            // Permissions missing
+            // Missing permissions
             ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         }
 
@@ -257,30 +225,64 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
+                if (PermissionChecker.checkSelfPermission(HomeScreen.this, "android.permission.ACCESS_FINE_LOCATION") == PermissionChecker.PERMISSION_GRANTED) {
+                    location.getLastLocation()
+                            .addOnSuccessListener(HomeScreen.this, new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location l) {
+                                    if (l != null) {
+                                        appData.setLocation(l.getLatitude(), l.getLongitude());
 
+                                        TextView loc = (TextView) findViewById(R.id.location);
+                                        String message = "Your location: \n" + appData.getLocation(HomeScreen.this);
+                                        loc.setText(message);
+                                    }
+                                }
+                            });
+                }
             }
 
             @Override
             public void onProviderEnabled(String provider) {
+                if (PermissionChecker.checkSelfPermission(HomeScreen.this, "android.permission.ACCESS_FINE_LOCATION") == PermissionChecker.PERMISSION_GRANTED) {
+                    location.getLastLocation()
+                            .addOnSuccessListener(HomeScreen.this, new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location l) {
+                                    if (l != null) {
+                                        appData.setLocation(l.getLatitude(), l.getLongitude());
 
+                                        TextView loc = (TextView) findViewById(R.id.location);
+                                        String m = "Your location: \n" + appData.getLocation(HomeScreen.this);
+                                        loc.setText(m);
+                                    }
+                                }
+                            });
+                }
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-                AlertDialog dialog = new AlertDialog.Builder(HomeScreen.this)
-                        .setMessage("To continue, please turn on location services.")
-                        .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                            }
-                        })
-                        .setNegativeButton("cancel", null)
-                        .create();
-                dialog.show();
+                TextView loc = (TextView) findViewById(R.id.location);
+                String message = "Your location: \n location unavailable";
+                loc.setText(message);
             }
         });
-        /*****************************/
+
+        // Ask to turn on location services if disabled
+        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            AlertDialog dialog = new AlertDialog.Builder(HomeScreen.this)
+                    .setMessage("To continue, please turn on location services.")
+                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("cancel", null)
+                    .create();
+            dialog.show();
+        }
 
         Button settings = (Button) findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
@@ -298,7 +300,6 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
             }
         });
 
-
         Button call = (Button) findViewById(R.id.call);
         call.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -307,71 +308,16 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
             }
         });
 
-//        Button temp = (Button) findViewById(R.id.temp);
-//        temp.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (PermissionChecker.checkSelfPermission(HomeScreen.this, "android.permission.ACCESS_FINE_LOCATION") == PermissionChecker.PERMISSION_GRANTED) {
-//                    location.getLastLocation()
-//                            .addOnSuccessListener(HomeScreen.this, new OnSuccessListener<Location>() {
-//                                @Override
-//                                public void onSuccess(Location l) {
-//                                    TextView t = (TextView) findViewById(R.id.textView);
-//                                    if (l != null) {
-//                                        appData.setLocation(l.getLatitude(), l.getLongitude());
-//                                        t.setText(appData.getLocation(HomeScreen.this));
-//
-//                                        // location found
-//                                        // https://stackoverflow.com/questions/1513485/how-do-i-get-the-current-gps-location-programmatically-in-android
-//                                    } else {
-//                                        // location not found
-//                                        t.setText("location unavailable");
-//                                    }
-//                                }
-//                            });
-//                } else {
-//                    // Permissions missing
-//                    ActivityCompat.requestPermissions(HomeScreen.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
-//                }
-//            }
-////            AlertDialog popup;
-////            CountDownTimer time;
-////
-////            @Override
-////            public void onClick(View v) {
-////                popup = new AlertDialog.Builder(HomeScreen.this)
-////                        .setTitle("FALL DETECTED!")
-////                        .setCancelable(false)
-////                        .setMessage ("")
-////                        .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-////                            @Override
-////                            public void onClick(DialogInterface dialog, int which) {
-////                                time.cancel();
-////                                makeEmergencyCall();
-////                            }
-////                        })
-////                        .setNegativeButton("no", new DialogInterface.OnClickListener() {
-////                            @Override
-////                            public void onClick(DialogInterface dialog, int which) {
-////                                time.cancel();
-////                            }
-////                        }).show();
-////
-////                time = new CountDownTimer(6000, 1000) {
-////                    @Override
-////                    public void onTick(long millisUntilFinished) {
-////                        popup.setMessage("Would you like to contact emergency personnel?\n" +
-////                                (int) millisUntilFinished / 1000 + " seconds remaining");
-////                    }
-////
-////                    @Override
-////                    public void onFinish() {
-////                        popup.cancel();
-////                        makeEmergencyCall();
-////                    }
-////                }.start();
-////            }
-//        });
+        graph = (GraphView) findViewById(R.id.graph);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX (0);
+        graph.getViewport().setMaxX (30);
+        series = new LineGraphSeries<>(new DataPoint[] {
+//                new DataPoint (0, 90),
+//                new DataPoint (1, 95),
+//                new DataPoint (2, 75)
+        });
+        graph.addSeries(series);
     }
 
     protected void makeEmergencyCall() {
@@ -388,7 +334,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         }
     }
 
-    protected void sendSMSMessage() {
+    protected void sendSMSMessage(String incident) {
         Calendar c = Calendar.getInstance();
         int am = c.get(Calendar.AM_PM);
         int hour = c.get(Calendar.HOUR);
@@ -399,9 +345,8 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         String MINUTE = ((minute < 10) ? "0".concat(Integer.toString(minute)) : Integer.toString(minute));
 
         String phoneNo = appData.getEmerNum();
-        String message = appData.getName() + ", age " + appData.getAge() + ", has saved their daily information "
-                + appData.getLocation(this) + " at " + HOUR + ":" + MINUTE + " " + AM + ". Temperature: "
-                + appData.getTemp() + ", blood pressure: " + appData.getBP();
+        String message = appData.getName() + ", age " + appData.getAge() + ", experienced a " + incident + " at "
+                + appData.getLocation(this) + " on " + HOUR + ":" + MINUTE + " " + AM;
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.SEND_SMS)
@@ -490,14 +435,17 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         testData = toDouble(messageEvent.getData());
 
         if (message.equals("heart") && !Double.isNaN(testData)) {
-//            TextView t = (TextView) findViewById(R.id.textView);
-//            t.setText(Double.toString(testData));
+            series.appendData (new DataPoint (dataSize, testData), true, 30);
+            Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
+            dataSize++;
         } else if (message.equals("call")) {
             makeEmergencyCall();
         } else if (message.equals("fall")) {
-
+            sendSMSMessage("fall");
+            makeEmergencyCall();
         } else if (message.equals("attack")) {
-
+            sendSMSMessage("heart attack");
+            makeEmergencyCall();
         }
     }
 
