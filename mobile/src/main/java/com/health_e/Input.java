@@ -2,7 +2,6 @@ package com.health_e;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -40,6 +39,7 @@ public class Input extends AppCompatActivity {
                 if (temp.getText().toString().length() > 0 && blood.getText().toString().length() > 0) {
                     appData.setTemp (Integer.valueOf(temp.getText().toString()));
                     appData.setBP (Integer.valueOf (blood.getText().toString()));
+                    appData.setUpdate (Calendar.getInstance());
                     sendSMSMessage();
                     finish();
                 } else {

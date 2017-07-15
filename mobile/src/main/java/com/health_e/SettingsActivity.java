@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceScreen;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
@@ -211,6 +213,22 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_history);
             setHasOptionsMenu(true);
+
+            PreferenceScreen screen = this.getPreferenceScreen();
+            Model m = Model.getInstance (screen.getContext());
+
+            for (int i = 0; i < m.historySize(); i++) {
+                EditTextPreference e = new EditTextPreference(screen.getContext());
+                e.setKey(Integer.toString(i));
+                e.setSelectable(false);
+                String message = "Temp: " + m.historyInfo("temp", i) + ", BP: "
+                        + m.historyInfo("bp", i) + ", Avg. HR: "
+                        + m.historyInfo("hr", i) + ", Date: "
+                        + m.historyInfo("date", i);
+                e.setTitle(message);
+
+                screen.addPreference(e);
+            }
         }
 
         @Override

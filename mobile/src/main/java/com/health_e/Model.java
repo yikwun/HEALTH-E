@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Vector;
 
 public class Model implements Serializable {
     private static final String mfileName = "appData";
@@ -23,8 +25,24 @@ public class Model implements Serializable {
     private static File mfile;
     private static File mHistory;
     private String name = "def_name", emer_name = "def_contact", age = "def_age", emer_num = "def_contact_num";
-    private int hr, temp, bp;
+    private int hr = 0, temp, bp;
     private double lat, lon;
+    private Calendar update;
+
+    class info {
+        int temp, bp, hr;
+        String date;
+
+        info (int t, int b, int h, Calendar d) {
+            temp = t;
+            bp = b;
+            hr = h;
+            date = d.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) + " " + d.get(Calendar.DAY_OF_MONTH)
+                    + ", " + d.get(Calendar.YEAR);
+        }
+    }
+
+    private Vector<info> history = new Vector();
 
     private Model(Context context) {
         readfromFile(context);
@@ -64,6 +82,8 @@ public class Model implements Serializable {
             this.age = singletonModel.age;
             this.emer_name = singletonModel.emer_name;
             this.emer_num = singletonModel.emer_num;
+            this.update = singletonModel.update;
+            this.history = singletonModel.history;
         } catch (FileNotFoundException e) {
             Log.e("Model", "FileNotFound");
             mfile = new File(context.getFilesDir(), mfileName);
@@ -75,14 +95,38 @@ public class Model implements Serializable {
         }
     }
 
+    public boolean getUpdate() {
+        Calendar c = Calendar.getInstance();
+        if (update == null) { update = Calendar.getInstance(); }
+        if (c.get (Calendar.DAY_OF_YEAR) > update.get (Calendar.DAY_OF_YEAR) ||
+            c.get (Calendar.YEAR) > update.get (Calendar.YEAR)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public int historySize() { return history.size(); }
+
+    public String historyInfo (String s, int index) {
+        switch (s) {
+            case "temp":
+                return Integer.toString (history.get (index).temp);
+            case "bp":
+                return Integer.toString (history.get (index).bp);
+            case "hr":
+                return Integer.toString (history.get (index).hr);
+            case "date":
+                return history.get (index).date;
+        }
+
+        return null;
+    }
+
     public int getBP() { return bp; }
 
     public int getTemp() {
         return temp;
-    }
-
-    public int getHR() {
-        return hr;
     }
 
     public String getName() {
@@ -108,11 +152,16 @@ public class Model implements Serializable {
             String address = addresses.get(0).getAddressLine(0);
             String city = addresses.get(0).getLocality();
             String prov = addresses.get(0).getAdminArea();
-            String loc = address.concat(", " + city + ", " + prov);
-            return loc;
+            return address.concat(", " + city + ", " + prov);
         } catch (Exception e) {}
 
         return "location unavailable";
+    }
+
+    public void setUpdate (Calendar u) {
+        update = u;
+        if (history.size() > 30) { history.remove (0); }
+        history.add (new info (temp, bp, hr, update));
     }
 
     public void setBP (int b) {
@@ -121,10 +170,6 @@ public class Model implements Serializable {
 
     public void setTemp(int t) {
         temp = t;
-    }
-
-    public void setHR(int h) {
-        hr = h;
     }
 
     public void setName(String s) {

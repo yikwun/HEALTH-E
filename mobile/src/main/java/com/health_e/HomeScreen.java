@@ -263,7 +263,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         // Ask to turn on location services if disabled
         if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             AlertDialog dialog = new AlertDialog.Builder(HomeScreen.this)
-                    .setMessage("To continue, please turn on location services.")
+                    .setMessage("Please turn on location services to continue")
                     .setPositiveButton("ok", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -305,6 +305,22 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         graph.getViewport().setMaxX (30);
         series = new LineGraphSeries<>();
         graph.addSeries(series);
+
+        // Remind user to input daily information once
+        if (appData.getUpdate()) {
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle ("REMINDER")
+                    .setMessage ("Remember to input your daily information!")
+                    .setPositiveButton("okay", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            appData.setUpdate (Calendar.getInstance());
+                        }
+                    })
+                    .setCancelable(false)
+                    .create();
+            dialog.show();
+        }
     }
 
     protected void makeEmergencyCall() {
@@ -386,6 +402,23 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         super.onStart();
         Log.i("HomeScreen", "OnStart");
         googleApiClient.connect();
+
+        // Reload location
+        if (PermissionChecker.checkSelfPermission(HomeScreen.this, "android.permission.ACCESS_FINE_LOCATION") == PermissionChecker.PERMISSION_GRANTED) {
+            location.getLastLocation()
+                    .addOnSuccessListener(HomeScreen.this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location l) {
+                            if (l != null) {
+                                appData.setLocation(l.getLatitude(), l.getLongitude());
+
+                                TextView loc = (TextView) findViewById(R.id.location);
+                                String message = "Your location: \n" + appData.getLocation(HomeScreen.this);
+                                loc.setText(message);
+                            }
+                        }
+                    });
+        }
     }
 
     @Override
