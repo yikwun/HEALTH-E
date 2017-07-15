@@ -104,8 +104,8 @@ public class Input extends AppCompatActivity {
                 }
             }
         }
-
     }
+
     protected void onPause(){
         super.onPause();
         Log.i("Input", "onPause");
@@ -119,8 +119,4 @@ public class Input extends AppCompatActivity {
         super.onDestroy();
         Log.i("Input", "onDestroy");
     }
-
-
-
-
 }

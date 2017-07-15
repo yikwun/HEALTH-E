@@ -75,8 +75,6 @@ public class Model implements Serializable {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public int getBP() { return bp; }

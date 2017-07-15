@@ -3,7 +3,6 @@
     package="com.health_e">
 
     <uses-permission android:name="android.permission.VIBRATE" />
-
     <uses-permission android:name="android.permission.BODY_SENSORS" />
 
     <uses-feature android:name="android.hardware.type.watch" />
@@ -23,6 +22,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".Detection"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:keepScreenOn="true"
     tools:context="com.health_e.MainActivity"
     tools:deviceIds="wear_round">
 
@@ -17,28 +18,20 @@
         android:layout_marginTop="30dp" />
 
     <TextView
-        android:id="@+id/ValX"
+        android:id="@+id/heartLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="TextView" />
+        android:text="Heart Rate:" />
 
     <TextView
-        android:id="@+id/ValY"
+        android:id="@+id/heartVal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/heartLabel"
         android:layout_marginTop="21dp"
-        android:text="TextView"
-        android:layout_below="@+id/ValX"
-        android:layout_alignStart="@+id/ValX" />
+        android:gravity="center"
+        android:layout_alignStart="@+id/heartLabel" />
 
-    <TextView
-        android:id="@+id/ValZ"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        android:layout_below="@+id/ValY"
-        android:layout_alignStart="@+id/ValY"
-        android:layout_marginTop="22dp" />
 </RelativeLayout>
