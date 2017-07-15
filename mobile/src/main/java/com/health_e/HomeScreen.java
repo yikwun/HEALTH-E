@@ -437,10 +437,10 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         } else if (message.equals("call")) {
             makeEmergencyCall();
         } else if (message.equals("fall")) {
-            sendSMSMessage("fall");
+            sendSMSMessage("FALL");
             makeEmergencyCall();
         } else if (message.equals("attack")) {
-            sendSMSMessage("heart attack");
+            sendSMSMessage("HEART ATTACK");
             makeEmergencyCall();
         }
     }
