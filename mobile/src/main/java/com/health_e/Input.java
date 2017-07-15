@@ -46,12 +46,7 @@ public class Input extends AppCompatActivity {
                     AlertDialog.Builder builder = new AlertDialog.Builder(Input.this);
                     builder.setTitle ("WARNING")
                             .setMessage("Not all fields have been completed!")
-                            .setNeutralButton("Okay", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            });
+                            .setNeutralButton("Okay", null);
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 }
@@ -100,7 +95,6 @@ public class Input extends AppCompatActivity {
                 } else {
                     Toast.makeText(getApplicationContext(),
                             "SMS failed, please try again.", Toast.LENGTH_LONG).show();
-                    return;
                 }
             }
         }

@@ -20,7 +20,6 @@ public class Model implements Serializable {
     private static final String mfileName = "appData";
     private static final String mHistoryName = "history";
     private static Model singletonModel;
-    private static Context mCtx;
     private static File mfile;
     private static File mHistory;
     private String name = "def_name", emer_name = "def_contact", age = "def_age", emer_num = "def_contact_num";

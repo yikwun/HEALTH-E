@@ -4,9 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -31,15 +29,8 @@ import android.widget.Toast;
 import android.telephony.PhoneStateListener;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
@@ -72,7 +63,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         appData = Model.getInstance(getApplicationContext());
 
         // First time the app is loaded
-        if (appData.getName() == "def_name") {
+        if (appData.getName().equals("def_name")) {
             final EditText nameInput = new EditText(this);
             nameInput.setInputType(InputType.TYPE_CLASS_TEXT);
 

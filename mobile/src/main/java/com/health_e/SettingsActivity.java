@@ -2,35 +2,20 @@ package com.health_e;
 
 
 import android.annotation.TargetApi;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.provider.Settings;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.RingtonePreference;
-import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -143,8 +128,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         Log.i("SettingActivity", "onDestroy");
     }
 
-
-
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
      */
@@ -252,34 +235,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_sync);
             setHasOptionsMenu(true);
-
-            // **********************
-            // TODO: Remember to try this on phone!
-            // Get the list of paired devices
-//            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-//            Set<BluetoothDevice> devices = adapter.getBondedDevices();
-//            List<String> names = new ArrayList();
-//            for (BluetoothDevice d : devices) {
-//                names.add(d.getName());
-//            }
-//
-//            // Set the summary
-//            Preference pref = findPreference("watch_connect");
-//            if (names.size() == 0) {
-//                pref.setKey("None");
-//            } else if (names.size() == 1) {
-//                pref.setKey(names.get(0));
-//            } else {
-//                // Currently, just lists all connected bluetooth devices in arbitrary order
-//                // What happens if there are too many?
-//                String s = "";
-//                for (String n : names) {
-//                    s.concat (n + ", ");
-//                }
-//                s = s.substring(0, s.length() - 2);
-//                pref.setKey (s);
-//            }
-//            // **********************
         }
 
         @Override
