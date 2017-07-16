@@ -12,9 +12,12 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
@@ -27,11 +30,15 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
-    float bpm, gravity[] = {0f, 0f, 0f}, linear_acceleration[] = {0f, 0f, 0f};
-    double totAcc, fallAcc, counter = 0, threshold = 5;
+    float bpm, HeartRate[]={0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f}, HeartRateAvg = 0, gravity[] = {0f, 0f, 0f}, linear_acceleration[] = {0f, 0f, 0f};
+    int HR_i = 0;
+    double totAcc, fallAcc, FallCounter = 0, threshold = 5;
     String nodeId;
     final int CONNECTION_TIME_OUT_MS = 5000;
 
+    boolean over = false;
+    boolean sendAttackFlag = false;
+    int sendAttackFlagCnt = 0;
     AlertDialog popup;
     CountDownTimer time;
     long[] pattern = {400, 400};
@@ -44,6 +51,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     Handler handler, timerHandler;
     int interval = 100; // read sensor data each 1000 ms
     boolean flag = false, detected = false, timerFlag = false;
+    float sim_scale = 2.0f;
+    boolean sim_flag = false;
 
     private final Runnable task = new Runnable() {
         @Override
@@ -63,13 +72,35 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     };
 
+
+    private void HeartAttackSim(){
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.round_activity_main);
 
         // TODO: heart attack simulation
-        Button b = (Button) findViewById(R.id.sendBtn);
+//        final Button HeartAttackBtn = (Button) findViewById(R.id.sendBtn);
+//        HeartAttackBtn.setOnClickListener(new View.OnClickListener(){
+//            public void onClick(View v) {
+//                sim_flag = !sim_flag;
+//
+//            }
+//        });
+
+        ToggleButton toggle = (ToggleButton) findViewById(R.id.TglBtn);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    sim_flag = true;
+                } else {
+                    sim_flag = false;
+                }
+            }
+        });
 
         retrieveDeviceNode();
 
@@ -84,6 +115,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         heart = (TextView) findViewById(R.id.heartVal);
     }
+
 
     public void fallDetectionAction() {
         final Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -128,7 +160,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 popup.cancel();
                 v1.cancel();
                 detected = false;
-                sendInfo("call", 0);
+                sendInfo("fall", 0);
             }
         }.start();
     }
@@ -144,8 +176,41 @@ public class MainActivity extends Activity implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         // Update the heart rate
         if (timerFlag) {
-            sendInfo("heart", bpm);
+            sendInfo("heart", (sim_flag ? bpm/sim_scale : bpm));
             timerFlag = false;
+
+            HR_i++;
+            if(HR_i>9) {
+                HR_i = 0;
+                over = true;
+            }
+
+            if (over)
+            {
+                HeartRateAvg = 0;
+                for (int i=0;i<10;i++)
+                {
+                    HeartRateAvg = HeartRateAvg + HeartRate[i];
+                }
+                HeartRateAvg = HeartRateAvg/10;
+                if ((bpm>HeartRateAvg*1.3 || bpm<HeartRateAvg*0.7) && !sendAttackFlag && sendAttackFlagCnt>15)
+                {
+                    sendInfo("attack",0);
+                    sendAttackFlag = true;
+                    Toast.makeText(getApplicationContext(), "HeartAttack", Toast.LENGTH_SHORT).show();
+                }
+                sendAttackFlagCnt++;
+                if (sendAttackFlag) {
+                    sendAttackFlagCnt++;
+                    if (sendAttackFlagCnt>10)
+                    {
+                        sendAttackFlagCnt=0;
+                        sendAttackFlag = false;
+                    }
+                }
+            }
+            HeartRate[HR_i] = bpm;
+            sendInfo ("avg", HeartRateAvg);
         }
 
         // Update the accelerometer
@@ -166,21 +231,24 @@ public class MainActivity extends Activity implements SensorEventListener {
                         linear_acceleration[1] * linear_acceleration[1] +
                         linear_acceleration[2] * linear_acceleration[2]);
 
-                fallAcc = linear_acceleration[2] / totAcc;
+                fallAcc = linear_acceleration[2];
             }
 
             // Update the heart rate
             if (event.sensor.getType() == Sensor.TYPE_HEART_RATE) {
-                String message = String.valueOf ((int) event.values[0]) + " bpm";
-                heart.setText(message);
                 bpm = event.values[0];
+                if (sim_flag)
+                    bpm = bpm/sim_scale;
+
+                String message = String.valueOf ((int) bpm) + " bpm";
+                heart.setText(message);
             }
 
             flag = false;
 
-            counter = ((totAcc > threshold) ? counter + 1 : 0);
+            FallCounter = ((totAcc > threshold) ? FallCounter + 1 : 0);
 
-            if (counter == 5 && !detected) {
+            if (FallCounter == 5 && !detected) {
                 fallDetectionAction();
             }
         }

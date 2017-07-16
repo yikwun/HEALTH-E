@@ -152,7 +152,8 @@ public class Model implements Serializable {
             String address = addresses.get(0).getAddressLine(0);
             String city = addresses.get(0).getLocality();
             String prov = addresses.get(0).getAdminArea();
-            return address.concat(", " + city + ", " + prov);
+            return address;
+//            return address.concat(", " + city + ", " + prov);
         } catch (Exception e) {}
 
         return "location unavailable";
@@ -163,6 +164,8 @@ public class Model implements Serializable {
         if (history.size() > 30) { history.remove (0); }
         history.add (new info (temp, bp, hr, update));
     }
+
+    public void setHR (int h) { hr = h; }
 
     public void setBP (int b) {
         bp = b;

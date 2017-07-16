@@ -223,7 +223,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 e.setSelectable(false);
                 String message = "Temp: " + m.historyInfo("temp", i) + ", BP: "
                         + m.historyInfo("bp", i) + ", Avg. HR: "
-                        + m.historyInfo("hr", i) + ", Date: "
+                        + m.historyInfo("hr", i) + ", "
                         + m.historyInfo("date", i);
                 e.setTitle(message);
 

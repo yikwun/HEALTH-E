@@ -35,11 +35,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.nio.ByteBuffer;
+import java.text.NumberFormat;
 import java.util.Calendar;
 
 public class HomeScreen extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks {
@@ -51,7 +53,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     double testData;
     GoogleApiClient googleApiClient;
     Model appData;
-    LineGraphSeries<DataPoint> series;
+    LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
     GraphView graph;
     int dataSize = 0;
 
@@ -303,7 +305,10 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setMinX (0);
         graph.getViewport().setMaxX (30);
-        series = new LineGraphSeries<>();
+        NumberFormat nf = NumberFormat.getInstance();
+        nf.setMaximumFractionDigits(0);
+        graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter(nf, nf));
+//        series = new LineGraphSeries<>();
         graph.addSeries(series);
 
         // Remind user to input daily information once
@@ -359,7 +364,11 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
                     MY_PERMISSIONS_REQUEST_SMS);
         } else {
             SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(phoneNo, null, message, null, null);
+//            int i = 1;
+//            while (message.length() - ((i-1) * 150) > 150) {
+                smsManager.sendTextMessage(phoneNo, null, message.substring(0, (message.length() > 160 ? 160 : message.length())), null, null);
+//                i++;
+//            }
             Toast.makeText(getApplicationContext(), "SMS sent.",
                     Toast.LENGTH_LONG).show();
         }
@@ -441,7 +450,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Wearable.MessageApi.addListener(googleApiClient, this);
-        Toast.makeText(getApplicationContext(), "Connected to Google API Client", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "Connected to Google API Client", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -456,7 +465,7 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
 
         if (message.equals("heart") && !Double.isNaN(testData)) {
             series.appendData (new DataPoint (dataSize, testData), true, 30);
-            Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "received", Toast.LENGTH_SHORT).show();
             dataSize++;
         } else if (message.equals("call")) {
             makeEmergencyCall();
@@ -466,6 +475,11 @@ public class HomeScreen extends AppCompatActivity implements MessageApi.MessageL
         } else if (message.equals("attack")) {
             sendSMSMessage("HEART ATTACK");
             makeEmergencyCall();
+        }
+
+        if (message.equals ("avg")) {
+            appData.setHR ((int) testData);
+//            Toast.makeText(getApplicationContext(), String.valueOf(testData), Toast.LENGTH_SHORT).show();
         }
     }
 
