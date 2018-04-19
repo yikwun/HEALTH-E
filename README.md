@@ -1,4 +1,4 @@
-Welcome!
+# HEALTH-E
 
 HEALTH-E is an Android specific application designed to monitor the health of users, aimed towards the elderly. 
 In this application, you'll find that a corresponding smartwatch must also be present as sensors such as the heartbeat monitor can only be found on a smartwatch.
@@ -13,7 +13,7 @@ Thank you for visiting the project! I encourage you to visit my other project fo
 
 
 
-How to set up Android smartwatch:
+## How to set up Android smartwatch:
 
 wear connection commands:
 
